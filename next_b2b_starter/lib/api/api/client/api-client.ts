@@ -26,12 +26,13 @@ export class ApiClient {
   private config: ApiClientConfig;
 
   constructor(config?: Partial<ApiClientConfig>) {
-    // Only read env on server, use provided config or fallback on client
+    // Server-side: use internal Docker network URL (Node.js needs absolute URLs)
+    // Client-side: use relative URL (browser adds origin, reverse proxy handles routing)
     const baseUrl =
       config?.baseUrl ||
       (typeof window === "undefined"
-        ? process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"
-        : "http://localhost:8080/api");
+        ? process.env.API_BASE_URL_INTERNAL || "http://localhost:8080/api"
+        : process.env.NEXT_PUBLIC_API_BASE_URL || "/api");
 
     this.config = {
       baseUrl,

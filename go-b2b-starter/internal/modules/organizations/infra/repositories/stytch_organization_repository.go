@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -143,8 +145,8 @@ func (r *stytchOrganizationRepository) CheckEmailExists(ctx context.Context, ema
 	// GetByUserEmail returns organization if email is found (and account is active)
 	_, err := r.localOrgRepo.GetByUserEmail(ctx, email)
 	if err != nil {
-		// Check if it's a "not found" error
-		if err.Error() == "organization not found" || err.Error() == "sql: no rows in result set" {
+		// Check if it's a "not found" error using proper error comparison
+		if errors.Is(err, domain.ErrOrganizationNotFound) || errors.Is(err, sql.ErrNoRows) {
 			r.logger.Debug("email not found", loggerDomain.Fields{
 				"email": email,
 			})
